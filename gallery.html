@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة الصور - مطبخ سُفرتي</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800&family=Tajawal:wght@400;500;700&display=swap');
+  :root{
+    --bg:#FBF1E7; --panel:#FFFDF9; --maroon:#5C1F3E; --maroon-dark:#3A1435;
+    --terracotta:#CF9A72; --border:#E7D5C4; --text:#3A1F2E; --subtext:#8A7666;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;}
+  .header{background:var(--maroon-dark);padding:16px;display:flex;align-items:center;gap:12px;}
+  .back-btn{color:#fff;text-decoration:none;font-size:20px;}
+  .header-title{font-family:'Cairo',sans-serif;color:#fff;font-weight:700;font-size:18px;}
+  .empty-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;padding:20px;text-align:center;}
+  .empty-icon{font-size:56px;margin-bottom:16px;}
+  .empty-title{font-family:'Cairo',sans-serif;color:var(--maroon-dark);font-weight:700;font-size:18px;margin-bottom:8px;}
+  .empty-sub{color:var(--subtext);font-size:14px;}
+</style>
+</head>
+<body>
+  <div class="header">
+    <a class="back-btn" href="index.html">→</a>
+    <div class="header-title">قائمة الصور</div>
+  </div>
+  <div class="empty-wrap">
+    <div class="empty-icon">📷</div>
+    <div class="empty-title">قريباً</div>
+    <div class="empty-sub">قائمة الصور بتتوفر هنا قريباً</div>
+  </div>
+</body>
+</html>
