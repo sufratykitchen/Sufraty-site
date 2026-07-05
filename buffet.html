@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة البوفيه - مطبخ سُفرتي</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@400;500;700&display=swap');
+  :root{
+    --bg:#FBF1E7; --panel:#FFFDF9; --maroon:#5C1F3E; --maroon-dark:#3A1435;
+    --terracotta:#CF9A72; --border:#E7D5C4; --text:#3A1F2E; --subtext:#8A7666; --err:#b23b3b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;}
+  .header{position:sticky;top:0;z-index:20;background:var(--maroon-dark);border-bottom:1px solid var(--terracotta);}
+  .header-inner{max-width:640px;margin:0 auto;padding:16px;display:flex;align-items:center;gap:12px;}
+  .back-btn{color:#fff;text-decoration:none;font-size:20px;}
+  .brand{font-family:'Cairo',sans-serif;color:#FBF1E7;font-weight:800;font-size:18px;}
+  .subbrand{color:var(--terracotta);font-size:12px;margin-top:2px;}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 60px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:14px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13px;color:var(--subtext);margin-bottom:6px;font-weight:700;}
+  .field input,.field select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);font-family:'Tajawal',sans-serif;font-size:14px;outline:none;background:#fff;}
+  .err-msg{color:var(--err);font-size:12px;margin-top:6px;}
+  .continue-btn{width:100%;padding:14px;border-radius:999px;background:var(--maroon);color:#fff;border:none;font-weight:700;font-size:15px;cursor:pointer;}
+  .continue-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .pkg-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px;}
+  .pkg-head{width:100%;display:flex;align-items:center;justify-content:space-between;padding:18px;background:none;border:none;cursor:pointer;text-align:right;font-family:'Tajawal',sans-serif;}
+  .pkg-title{font-family:'Cairo',sans-serif;color:var(--maroon-dark);font-weight:800;font-size:17px;}
+  .pkg-sub{color:var(--subtext);font-size:12px;margin-top:2px;}
+  .pkg-price{color:var(--maroon);font-weight:800;font-size:16px;white-space:nowrap;}
+  .pkg-body{border-top:1px solid var(--border);padding:16px 18px;}
+  .pkg-cat-title{font-family:'Cairo',sans-serif;color:var(--maroon-dark);font-weight:700;font-size:14px;margin:12px 0 6px;}
+  .pkg-cat-title:first-child{margin-top:0;}
+  .pkg-items{color:var(--text);font-size:14px;line-height:1.9;}
+  .order-btn{display:block;width:100%;text-align:center;padding:14px;border-radius:999px;background:var(--terracotta);color:var(--maroon-dark);font-weight:700;font-size:15px;text-decoration:none;margin-top:16px;}
+  .notes-box{background:#F3E4D2;border:1px solid var(--terracotta);border-radius:16px;padding:18px;margin-top:8px;}
+  .notes-title{font-family:'Cairo',sans-serif;color:var(--maroon-dark);font-weight:700;font-size:14px;margin-bottom:10px;}
+  .notes-box ul{margin:0;padding-inline-start:18px;font-size:13px;color:var(--text);line-height:1.9;}
+  .summary-bar{background:var(--maroon-dark);border-radius:16px;padding:14px 18px;margin-bottom:14px;color:#fff;font-size:13px;line-height:1.8;}
+  .summary-bar strong{color:var(--terracotta);}
+  .change-btn{background:none;border:none;color:var(--terracotta);font-size:12px;text-decoration:underline;cursor:pointer;padding:0;margin-top:6px;}
+  .locate-btn{width:100%;padding:12px;border-radius:10px;border:1px dashed var(--terracotta);background:none;color:var(--maroon);font-weight:700;font-size:14px;cursor:pointer;font-family:'Tajawal',sans-serif;}
+  .emirate-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;background:#fff;cursor:pointer;}
+  .emirate-row.selected{border-color:var(--maroon);background:#FBF1E7;}
+  .emirate-name{font-size:13px;}
+  .emirate-price{font-size:13px;font-weight:700;color:var(--maroon);white-space:nowrap;}
+  .emirate-unavail{font-size:11px;color:var(--subtext);white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <a class="back-btn" href="index.html">→</a>
+    <div>
+      <div class="brand">قائمة البوفيه</div>
+      <div class="subbrand">خيارات البوفيهات والمناسبات</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- Step 1: date/time/phone -->
+  <div id="stepInfo">
+    <div class="card">
+      <div class="field">
+        <label>تاريخ البوفيه</label>
+        <input type="date" id="buffetDate">
+        <div class="err-msg" id="dateErr" style="display:none;"></div>
+      </div>
+      <div class="field">
+        <label>وقت البوفيه</label>
+        <select id="buffetTime">
+          <option value="">اختر الوقت</option>
+          <option value="بوفيه غداء (التوصيل من 1:00 إلى 1:30)">بوفيه غداء (التوصيل من 1:00 إلى 1:30)</option>
+          <option value="بوفيه عشاء (التوصيل من 7:00 إلى 7:30)">بوفيه عشاء (التوصيل من 7:00 إلى 7:30)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>رقم الهاتف</label>
+        <input type="tel" id="buffetPhone" placeholder="05xxxxxxxx">
+      </div>
+      <div class="field">
+        <label>موقع التوصيل</label>
+        <button type="button" class="locate-btn" id="locateBtn">📍 حدد موقعي تلقائياً</button>
+        <div id="locateStatus" style="font-size:12px;color:var(--subtext);margin-top:6px;"></div>
+        <div id="emirateList" style="margin-top:10px;"></div>
+      </div>
+      <button class="continue-btn" id="continueBtn">متابعة لاختيار الباقة</button>
+    </div>
+  </div>
+
+  <!-- Step 2: packages -->
+  <div id="stepPackages" style="display:none;">
+    <div class="summary-bar">
+      📅 <strong id="sumDate"></strong> &nbsp; ⏰ <strong id="sumTime"></strong> &nbsp; 📞 <strong id="sumPhone"></strong>
+      <br>📍 <strong id="sumEmirate"></strong> — <strong id="sumDeliveryPrice"></strong>
+      <br><button class="change-btn" id="changeInfoBtn">تعديل البيانات</button>
+    </div>
+    <div id="pkgList"></div>
+  </div>
+
+  <div class="notes-box">
+    <div class="notes-title">ملاحظات على الباقات</div>
+    <ul>
+      <li>يمكن اختيار أصناف السندويشات من قائمة السندويشات المشكّلة في قائمة الطعام.</li>
+      <li>تُلغى السندويشات في بوفيه الغداء وتُستبدل بصنف آخر.</li>
+      <li>جبز كيك (اختياري): الفستق - نوتيلا بالرمان - الجلاكسي.</li>
+      <li>يمكن إضافة هذه الأصناف للبوفيه: عيش بالريش، عيش برياني بالحلبة، مالح تحت العيش، برياني ربيان، عيش بالشعيرية مع دجاج بالباشاميل.</li>
+      <li>في حالة زيادة طبق على البوفيه سيكون هناك زيادة على السعر (يتم تحديد السعر حسب نوع الطبق).</li>
+    </ul>
+  </div>
+
+  <div class="notes-box" style="margin-top:14px;">
+    <div class="notes-title">معلومات مهمة</div>
+    <ul>
+      <li>لا يشمل البوفيه المشروبات الغازية أو الماء أو العصائر الطازجة (تُطلب بشكل منفصل).</li>
+      <li>لا يشمل البوفيه الطاولات والكراسي — طاولات البوفيه فقط.</li>
+      <li>لا يُحتسب سعر البوفيه بعدد الأشخاص، بل بحسب الأطباق التي يتم اختيارها.</li>
+      <li>الأسعار ثابتة.</li>
+      <li>توصيل بوفيه الغداء من الساعة 1 إلى 1:30 كحد أقصى، وبوفيه العشاء من الساعة 7 إلى 7:30.</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = "https://wzczuwnoumkavrlyvpwr.supabase.co";
+const SUPABASE_KEY = "sb_publishable_u1JS8Pkbaxptpiwmztx-Ug_meIgC3Hn";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const WHATSAPP_NUMBER = "971552885252";
+
+const DEFAULT_PACKAGES = [
+  {
+    id: 'p1', title: 'الباقة الأولى', people: '20-30 شخص', price: 2500,
+    categories: [
+      { name: 'السلطات', items: ['تبولة', 'تبولة الشمندر'] },
+      { name: 'المقبلات', items: ['فتة / فتة العرايس / فتة الزهرة', 'ورق عنب', 'كوسى باللبن'] },
+      { name: 'الأطباق الرئيسية', items: ['لازانيا', 'باستا حمرا', 'صينية السندويشات (30 حبة)'] },
+      { name: 'العيوش', items: ['مقلوبة', 'برياني', 'كاري'] },
+      { name: 'الحلويات', items: ['فالودة', 'بسبوسة', 'جبز كيك'] },
+    ]
+  },
+  {
+    id: 'p2', title: 'الباقة الثانية', people: '30-50 شخص', price: 3300,
+    categories: [
+      { name: 'السلطات', items: ['فتوش', 'تبولة', 'دوريتوس'] },
+      { name: 'المقبلات', items: ['ورق عنب', 'ملفوف', 'ربيان'] },
+      { name: 'الأطباق الرئيسية', items: ['لازانيا', 'نودلز', 'صينية السندويشات (40 حبة)'] },
+      { name: 'العيوش', items: ['مضروبة', 'محاشي مشكلة', 'برياني / كشميري / هندي', 'كاري وعيش أخضر'] },
+      { name: 'الحلويات', items: ['هملايا (15 حبة)', 'تيراميسو (كبيرة)', 'بر الوالدين (12 حبة)', 'كنافة (12 حبة)'] },
+    ]
+  },
+  {
+    id: 'p3', title: 'الباقة الثالثة', people: '50-70 شخص', price: 4700,
+    categories: [
+      { name: 'السلطات', items: ['فتوش', 'تبولة', 'دوريتوس', 'تبولة الشمندر'] },
+      { name: 'المقبلات', items: ['فتة / فتة العرايس / فتة الزهرة', 'ورق عنب', 'محشي مشكل', 'ربيان'] },
+      { name: 'الأطباق الرئيسية', items: ['لازانيا', 'نودلز', 'صينية السندويشات (50 حبة)'] },
+      { name: 'العيوش', items: ['عيش أمريكي', 'برياني', 'كاري + عيش'] },
+      { name: 'الحلويات', items: ['أم علي', 'هملايا', 'فالودة', 'فواكه', 'بسبوسة'] },
+    ]
+  },
+];
+
+let PACKAGES = [];
+
+function normalizePackages(pkgs){
+  // items may be plain strings (from DEFAULT_PACKAGES) or {id,name} objects (from admin)
+  return pkgs.map(p=>({
+    ...p,
+    categories: p.categories.map(cat=>({
+      name: cat.name,
+      items: cat.items.map(it=> typeof it === 'string' ? it : it.name)
+    }))
+  }));
+}
+
+async function loadPackages(){
+  try{
+    const { data: rows, error } = await sb.from('menu_data').select('content').eq('id',2).single();
+    if(!error && rows && rows.content && rows.content.packages && rows.content.packages.length){
+      PACKAGES = normalizePackages(rows.content.packages);
+    } else {
+      PACKAGES = DEFAULT_PACKAGES;
+    }
+  }catch(e){
+    PACKAGES = DEFAULT_PACKAGES;
+  }
+}
+
+function fmt(n){ return new Intl.NumberFormat("en-US").format(n); }
+
+let blockedDates = [];
+let selectedInfo = { date:'', time:'', phone:'' };
+let openPkg = null;
+let delivery = [];
+let selectedEmirate = null;
+
+const EMIRATE_CENTERS = [
+  { id:'e1', name:'أبوظبي', lat:24.4539, lng:54.3773 },
+  { id:'e2', name:'دبي', lat:25.2048, lng:55.2708 },
+  { id:'e3', name:'الشارقة', lat:25.3463, lng:55.4209 },
+  { id:'e4', name:'عجمان', lat:25.4052, lng:55.5136 },
+  { id:'e5', name:'أم القيوين', lat:25.5647, lng:55.5533 },
+  { id:'e6', name:'رأس الخيمة', lat:25.7895, lng:55.9432 },
+  { id:'e7', name:'الفجيرة', lat:25.1288, lng:56.3265 },
+];
+
+function buildInitialDelivery(){
+  return EMIRATE_CENTERS.map((e,i)=>({ id:'d'+(i+1), name:e.name, price:null }));
+}
+
+async function loadDeliveryData(){
+  try{
+    const { data: rows, error } = await sb.from('menu_data').select('content').eq('id',1).single();
+    if(!error && rows && rows.content && rows.content.delivery && rows.content.delivery.length){
+      delivery = rows.content.delivery;
+    } else {
+      delivery = buildInitialDelivery();
+    }
+  }catch(e){
+    delivery = buildInitialDelivery();
+  }
+  renderEmirateList();
+}
+
+function renderEmirateList(){
+  const wrap = document.getElementById('emirateList');
+  wrap.innerHTML = delivery.map(d=>{
+    const available = d.price != null;
+    const isSel = selectedEmirate === d.id;
+    return `
+      <div class="emirate-row ${isSel?'selected':''}" data-emirate="${available ? d.id : ''}" style="${!available?'opacity:.5;cursor:not-allowed;':''}">
+        <span class="emirate-name">${d.name}</span>
+        ${available ? `<span class="emirate-price">${fmt(d.price)} د.إ</span>` : `<span class="emirate-unavail">غير متوفر</span>`}
+      </div>`;
+  }).join('');
+  wrap.querySelectorAll('[data-emirate]').forEach(el=>{
+    if(!el.dataset.emirate) return;
+    el.addEventListener('click', ()=>{
+      selectedEmirate = el.dataset.emirate;
+      renderEmirateList();
+    });
+  });
+}
+
+function haversine(lat1,lng1,lat2,lng2){
+  const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+document.getElementById('locateBtn').addEventListener('click', ()=>{
+  const status = document.getElementById('locateStatus');
+  if(!navigator.geolocation){
+    status.textContent = 'المتصفح ما يدعم تحديد الموقع، اختر إمارتك يدوياً من القائمة تحت.';
+    return;
+  }
+  status.textContent = '...جاري تحديد موقعك';
+  navigator.geolocation.getCurrentPosition(
+    (pos)=>{
+      const { latitude, longitude } = pos.coords;
+      let nearest = null, minDist = Infinity;
+      EMIRATE_CENTERS.forEach(e=>{
+        const dist = haversine(latitude, longitude, e.lat, e.lng);
+        if(dist < minDist){ minDist = dist; nearest = e; }
+      });
+      const match = delivery.find(d=>d.name === nearest.name);
+      if(match){
+        selectedEmirate = match.id;
+        renderEmirateList();
+        status.textContent = `تم تحديد موقعك: ${nearest.name} ✓`;
+      } else {
+        status.textContent = 'ما قدرنا نطابق موقعك مع إمارة، اختر يدوياً من القائمة تحت.';
+      }
+    },
+    ()=>{
+      status.textContent = 'ما قدرنا نوصل لموقعك، اختر إمارتك يدوياً من القائمة تحت.';
+    }
+  );
+});
+
+async function loadBlockedDates(){
+  try{
+    const { data: rows, error } = await sb.from('menu_data').select('content').eq('id',3).single();
+    if(!error && rows && rows.content){
+      blockedDates = rows.content.blockedDates || [];
+    }
+  }catch(e){ blockedDates = []; }
+}
+
+function todayStr(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+
+document.getElementById('buffetDate').min = todayStr();
+
+document.getElementById('continueBtn').addEventListener('click', async ()=>{
+  const date = document.getElementById('buffetDate').value;
+  const time = document.getElementById('buffetTime').value;
+  const phone = document.getElementById('buffetPhone').value.trim();
+  const dateErr = document.getElementById('dateErr');
+  dateErr.style.display = 'none';
+
+  if(!date || !time || !phone){
+    alert('عبّي كل الحقول (التاريخ والوقت ورقم الهاتف) عشان تكمل.');
+    return;
+  }
+  if(!selectedEmirate){
+    alert('حدد موقع التوصيل (تلقائياً أو يدوياً) عشان نعرف سعر التوصيل.');
+    return;
+  }
+  if(blockedDates.includes(date)){
+    dateErr.textContent = 'عذراً، ما نستقبل طلبات بوفيه بهذا التاريخ. اختر تاريخ ثاني.';
+    dateErr.style.display = 'block';
+    return;
+  }
+
+  const emirateObj = delivery.find(d=>d.id===selectedEmirate);
+  selectedInfo = { date, time, phone, emirateName: emirateObj.name, deliveryPrice: emirateObj.price };
+  document.getElementById('sumDate').textContent = date;
+  document.getElementById('sumTime').textContent = time;
+  document.getElementById('sumPhone').textContent = phone;
+  document.getElementById('sumEmirate').textContent = emirateObj.name;
+  document.getElementById('sumDeliveryPrice').textContent = `توصيل ${fmt(emirateObj.price)} د.إ`;
+
+  document.getElementById('stepInfo').style.display = 'none';
+  document.getElementById('stepPackages').style.display = 'block';
+  await packagesReady;
+  renderPackages();
+});
+
+document.getElementById('changeInfoBtn').addEventListener('click', ()=>{
+  document.getElementById('stepPackages').style.display = 'none';
+  document.getElementById('stepInfo').style.display = 'block';
+});
+
+function renderPackages(){
+  const list = document.getElementById('pkgList');
+  list.innerHTML = '';
+  PACKAGES.forEach(pkg=>{
+    const isOpen = openPkg === pkg.id;
+    const el = document.createElement('div');
+    el.className = 'pkg-card';
+
+    const head = document.createElement('button');
+    head.className = 'pkg-head';
+    head.innerHTML = `
+      <div>
+        <div class="pkg-title">${pkg.title}</div>
+        <div class="pkg-sub">${pkg.people}</div>
+      </div>
+      <div class="pkg-price">${fmt(pkg.price)} د.إ</div>
+    `;
+    head.addEventListener('click', ()=>{
+      openPkg = isOpen ? null : pkg.id;
+      renderPackages();
+    });
+    el.appendChild(head);
+
+    if(isOpen){
+      const body = document.createElement('div');
+      body.className = 'pkg-body';
+      body.innerHTML = pkg.categories.map(cat=>`
+        <div class="pkg-cat-title">${cat.name}</div>
+        <div class="pkg-items">${cat.items.join(' • ')}</div>
+      `).join('') + `<a class="order-btn" href="${buildOrderLink(pkg)}" target="_blank">📲 اطلب هذه الباقة عبر واتساب</a>`;
+      el.appendChild(body);
+    }
+    list.appendChild(el);
+  });
+}
+
+function buildOrderLink(pkg){
+  const itemsText = pkg.categories.map(cat=>`${cat.name}: ${cat.items.join('، ')}`).join('\n');
+  const total = (pkg.price||0) + (selectedInfo.deliveryPrice||0);
+  const text = `طلب بوفيه من مطبخ سُفرتي\n\nالباقة: ${pkg.title} (${pkg.people}) - ${fmt(pkg.price)} درهم\nالتاريخ: ${selectedInfo.date}\nالوقت: ${selectedInfo.time}\nرقم الهاتف: ${selectedInfo.phone}\nموقع التوصيل: ${selectedInfo.emirateName} (${fmt(selectedInfo.deliveryPrice)} درهم)\nالإجمالي: ${fmt(total)} درهم\n\nمحتويات الباقة:\n${itemsText}`;
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+}
+
+const packagesReady = loadPackages();
+loadBlockedDates();
+loadDeliveryData();
+</script>
+</body>
+</html>
