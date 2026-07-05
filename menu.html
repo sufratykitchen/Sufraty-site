@@ -82,6 +82,10 @@
     </div>
   </div>
 
+  <div id="closedBanner" style="display:none;background:#b23b3b;color:#fff;text-align:center;padding:12px 16px;font-size:14px;font-weight:700;">
+    عذراً، ما نستقبل طلبات اليوم. جرب تواصل معنا أو ارجع بكرة 🙏
+  </div>
+
   <div class="wrap">
     <div class="search-bar">
       <div class="search-box">
@@ -153,6 +157,22 @@ let cartOpen = false;
 let payMethod = 'cash';
 
 function fmt(n){ return new Intl.NumberFormat("en-US").format(n); }
+
+let isOrderingBlocked = false;
+
+async function checkBlockedDate(){
+  try{
+    const { data: rows, error } = await sb.from('menu_data').select('content').eq('id',3).single();
+    if(!error && rows && rows.content){
+      const blockedDates = rows.content.blockedDates || [];
+      const today = new Date().toISOString().slice(0,10);
+      if(blockedDates.includes(today)){
+        isOrderingBlocked = true;
+        document.getElementById('closedBanner').style.display = 'block';
+      }
+    }
+  }catch(e){}
+}
 
 async function loadData(){
   try{
@@ -347,6 +367,10 @@ document.getElementById('cartToggle').addEventListener('click', ()=>{ cartOpen=!
 const WHATSAPP_NUMBER = "971552885252";
 
 document.getElementById('copyBtn').addEventListener('click', async ()=>{
+  if(isOrderingBlocked){
+    alert('عذراً، ما نستقبل طلبات اليوم. جرب تواصل معنا أو ارجع بكرة.');
+    return;
+  }
   const lines = cartLines();
   const delItem = selectedDeliveryItem();
   const itemsTotal = lines.reduce((s,l)=>s+(l.price||0)*l.qty,0);
@@ -388,6 +412,7 @@ document.getElementById('copyBtn').addEventListener('click', async ()=>{
 });
 
 loadData();
+checkBlockedDate();
 </script>
 </body>
 </html>
