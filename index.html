@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مطبخ سُفرتي</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@400;500;700&display=swap');
+
+  :root{
+    --bg:#FBF1E7; --panel:#FFFDF9; --maroon:#5C1F3E; --maroon-dark:#3A1435;
+    --terracotta:#CF9A72; --border:#E7D5C4; --text:#3A1F2E; --subtext:#8A7666;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:linear-gradient(180deg, var(--maroon-dark) 0%, var(--maroon) 55%, var(--bg) 55%);
+    font-family:'Tajawal',sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:40px 20px 60px;
+  }
+  .logo{
+    width:150px;
+    height:150px;
+    border-radius:999px;
+    object-fit:cover;
+    margin-top:20px;
+    margin-bottom:20px;
+  }
+  .brand{
+    font-family:'Cairo',sans-serif;
+    color:#fff;
+    font-weight:800;
+    font-size:24px;
+    margin-bottom:4px;
+    text-align:center;
+  }
+  .subbrand{
+    color:var(--terracotta);
+    font-size:13px;
+    margin-bottom:36px;
+    text-align:center;
+  }
+  .options{
+    width:100%;
+    max-width:380px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .option-card{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:20px;
+    text-decoration:none;
+    box-shadow:0 4px 14px rgba(58,20,53,0.08);
+    transition:transform .15s ease;
+  }
+  .option-card:active{ transform:scale(0.97); }
+  .option-icon{
+    width:52px;
+    height:52px;
+    border-radius:14px;
+    background:var(--maroon);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    flex-shrink:0;
+  }
+  .option-text{ flex:1; }
+  .option-title{
+    font-family:'Cairo',sans-serif;
+    color:var(--maroon-dark);
+    font-weight:700;
+    font-size:17px;
+    margin-bottom:2px;
+  }
+  .option-sub{
+    color:var(--subtext);
+    font-size:12px;
+  }
+  .option-arrow{
+    color:var(--terracotta);
+    font-size:20px;
+  }
+</style>
+</head>
+<body>
+
+<img class="logo" src="Logo.jpg.jpeg" alt="مطبخ سُفرتي">
+<div class="brand">مطبخ سُفرتي</div>
+<div class="subbrand">اختر القائمة اللي تبيها</div>
+
+<div class="options">
+  <a class="option-card" href="menu.html">
+    <div class="option-icon">🍽️</div>
+    <div class="option-text">
+      <div class="option-title">قائمة الطعام</div>
+      <div class="option-sub">تصفح الأصناف واطلب مباشرة</div>
+    </div>
+    <div class="option-arrow">‹</div>
+  </a>
+
+  <a class="option-card" href="buffet.html">
+    <div class="option-icon">🍛</div>
+    <div class="option-text">
+      <div class="option-title">قائمة البوفيه</div>
+      <div class="option-sub">خيارات البوفيهات والمناسبات</div>
+    </div>
+    <div class="option-arrow">‹</div>
+  </a>
+
+  <a class="option-card" href="gallery.html">
+    <div class="option-icon">📷</div>
+    <div class="option-text">
+      <div class="option-title">قائمة الصور</div>
+      <div class="option-sub">شاهد صور أطباقنا</div>
+    </div>
+    <div class="option-arrow">‹</div>
+  </a>
+</div>
+
+</body>
+</html>
