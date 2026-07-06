@@ -19,7 +19,15 @@
     <div class="icon">✅</div>
     <h1>تم الدفع بنجاح!</h1>
     <p>شكراً لطلبك من مطبخ سُفرتي. اضغط الزر تحت لتأكيد تفاصيل التوصيل معنا عبر واتساب.</p>
-    <a class="btn" href="https://wa.me/971552885252?text=مرحباً، سويت طلب ودفعت عن طريق البطاقة، أبغى أأكد تفاصيل التوصيل." target="_blank">تأكيد الطلب عبر واتساب</a>
+    <a class="btn" id="waBtn" href="#" target="_blank">تأكيد الطلب عبر واتساب</a>
   </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const summary = params.get('summary');
+    const message = summary
+      ? `${summary}\n\nتم الدفع بنجاح ✅`
+      : 'مرحباً، سويت طلب ودفعت عن طريق البطاقة، أبغى أأكد تفاصيل التوصيل.';
+    document.getElementById('waBtn').href = `https://wa.me/971552885252?text=${encodeURIComponent(message)}`;
+  </script>
 </body>
 </html>
